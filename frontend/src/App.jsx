@@ -59,20 +59,25 @@ function parseUpiQr(text) {
       amount = rawAmount;
     }
 
+
     return {
       upiId,
       payeeName: params.get('pn') || '',
       amount,
       note: params.get('tn') || '',
       currency: params.get('cu') || 'INR',
+      originalParams: [...params.entries()],
     };
+
   } catch {
     return null;
   }
 }
 
-function buildUpiUri({ upiId, payeeName, amount, note }) {
-  const params = new URLSearchParams();
+
+
+function buildUpiUri({ upiId, payeeName, amount, note, originalParams }) {
+  const params = new URLSearchParams(originalParams || []);
 
   params.set('pa', upiId.trim());
   params.set('cu', 'INR');
@@ -85,13 +90,16 @@ function buildUpiUri({ upiId, payeeName, amount, note }) {
     params.set('am', Number(amount).toFixed(2));
   }
 
-// Add a transaction note only when one is intentionally provided.
-if (note && note.trim()) {
-  params.set('tn', note.trim());
-}
+  if (note && note.trim()) {
+    params.set('tn', note.trim());
+  } else {
+    params.delete('tn');
+  }
 
   return `upi://pay?${params.toString()}`;
 }
+
+
 
 export default function App() {
   const [upiId, setUpiId] = useState('');
@@ -216,12 +224,15 @@ function continueToUpiApp() {
     return;
   }
 
-  const uri = buildUpiUri({
-    upiId: scannedQr.upiId,
-    payeeName: scannedQr.payeeName,
-    amount: value,
-    note: scannedQr.note || '',
-  });
+
+    const uri = buildUpiUri({
+      upiId: scannedQr.upiId,
+      payeeName: scannedQr.payeeName,
+      amount: value,
+      note: scannedQr.note || '',
+      originalParams: scannedQr.originalParams,
+    });
+
 
   setShopError('');
 
