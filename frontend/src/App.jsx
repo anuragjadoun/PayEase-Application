@@ -31,6 +31,7 @@ function parseUpiQr(text) {
     }
 
     const params = url.searchParams;
+    console.log('Original UPI QR parameters:', [...params.entries()]);
     const upiId = params.get('pa')?.trim();
 
     if (
@@ -62,7 +63,7 @@ function parseUpiQr(text) {
       upiId,
       payeeName: params.get('pn') || '',
       amount,
-      note: params.get('tn') || 'Shop payment',
+      note: params.get('tn') || '',
       currency: params.get('cu') || 'INR',
     };
   } catch {
