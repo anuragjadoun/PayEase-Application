@@ -84,9 +84,10 @@ function buildUpiUri({ upiId, payeeName, amount, note }) {
     params.set('am', Number(amount).toFixed(2));
   }
 
-  if (note.trim()) {
-    params.set('tn', note.trim());
-  }
+// Add a transaction note only when one is intentionally provided.
+if (note && note.trim()) {
+  params.set('tn', note.trim());
+}
 
   return `upi://pay?${params.toString()}`;
 }
@@ -218,7 +219,7 @@ function continueToUpiApp() {
     upiId: scannedQr.upiId,
     payeeName: scannedQr.payeeName,
     amount: value,
-    note: scannedQr.note || 'Shop payment',
+    note: scannedQr.note || '',
   });
 
   setShopError('');
